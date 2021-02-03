@@ -1,4 +1,9 @@
-d:\Components\CommonComp\FlexCelVCL\Demo\Delphi
+SELECT        dbo.[document].date, dbo.contentTask02vrm.numberAccept
+FROM            dbo.[document] INNER JOIN
+                         dbo.headTask02vrm ON dbo.[document].uid = dbo.headTask02vrm.uid INNER JOIN
+                         dbo.contentTask02vrm ON dbo.headTask02vrm.uid = dbo.contentTask02vrm.headUID
+WHERE        (dbo.[document].date BETWEEN :aDate1 AND :aDate2)
 
 
 https://docs.devexpress.com/WindowsForms/8117/controls-and-libraries/chart-control
+https://www.programmersforum.ru/showthread.php?t=79321
