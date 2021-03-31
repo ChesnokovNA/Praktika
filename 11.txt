@@ -1,9 +1,115 @@
-SELECT        dbo.[document].date, dbo.contentTask02vrm.numberAccept
-FROM            dbo.[document] INNER JOIN
-                         dbo.headTask02vrm ON dbo.[document].uid = dbo.headTask02vrm.uid INNER JOIN
-                         dbo.contentTask02vrm ON dbo.headTask02vrm.uid = dbo.contentTask02vrm.headUID
-WHERE        (dbo.[document].date BETWEEN :aDate1 AND :aDate2)
-
-
 https://docs.devexpress.com/WindowsForms/8117/controls-and-libraries/chart-control
 https://www.programmersforum.ru/showthread.php?t=79321
+https://forundex.ru/yap/Kak-zapolnitj-i-obrabotatj-TcxBarEditItem-v-rezhime-komboboks-38093
+
+
+SELECT        deptUser, loginUser, passwordUser
+FROM            TPAUserGrafiks
+WHERE        (deptUser = :aComboDept) 
+      AND (passwordUser = :aTxtPassword)
+      AND (loginUser = :aComboLogin)
+
+UPDATE TPAUserGrafiks
+SET passwordUser = 'TestUser2' 
+WHERE loginUser = 'BigBog' and deptUser ='22' 
+
+
+SELECT DISTINCT Num_Equipment
+FROM            sc002.Tags
+
+WHERE        (NOT (UID IN (1, 2))) AND (Num_Equipment = 'Печь светлого отжига  ОТТО Юнкер 1')
+
+
+WHERE ((Tagname LIKE 'PSO.pso1%') and ( (UID IN (2,3,4, 5,10,12,31,32))and (UID IN (15 .. 26))  and  (UID IN  (27 .. 30)))
+
+SELECT        UIDTags, Value, YEAR(Timestamp) AS Expr1, MONTH(Timestamp) AS Expr2, DAY(Timestamp) AS Expr3
+FROM            sc006.Measures
+Group by Expr3
+WHERE        (Timestamp BETWEEN '02.22.2020' AND '02.28.2021') AND (UIDTags = 21)
+
+
+
+select q.Expr1, q.Expr2, q.Expr3, q.Expr4, MAX (q.Value)
+from
+(
+SELECT        UIDTags, Value, YEAR(Timestamp) AS Expr1, MONTH(Timestamp) AS Expr2, DAY(Timestamp) AS Expr3, { fn HOUR(Timestamp) } AS Expr4
+
+FROM            sc006.Measures
+WHERE        (Timestamp BETWEEN '02.22.2020' AND '02.22.2021') AND (UIDTags = 21)
+) as q
+GROUP BY q.Expr4,q.Expr3,q.Expr2,q.Expr1
+order by q.Expr1, q.Expr2, q.Expr3, q.Expr4
+
+
+
+
+
+
+Select q.Comment, q.Expr1, q.Expr2, q.Expr3, q.Expr4, MAX(q.Value) as Value  from ( 
+Select ISNULL(TPA.!aDept.Tags.Comment, TPA.!aDept.Tags.Description) AS Comment, UIDTags,Timestamp ,CAST(Value AS Numeric(10, 0)) AS Value, YEAR(Timestamp) AS Expr1, MONTH(Timestamp) AS Expr2, DAY(Timestamp) AS Expr3, { fn HOUR(Timestamp) } AS Expr4
+FROM            TPA.!aDept.Tags INNER JOIN
+                         TPA.!aDept.Measures ON TPA.!aDept.Tags.UID = TPA.!aDept.Measures.UIDTags
+WHERE uid in (!aUids) and (Timestamp BETWEEN :aDateFirst AND :aDateSecond )
+ 
+ ) as q GROUP BY q.Expr4,q.Expr3, q.Expr2, q.Expr1,q.Comment
+order by q.Expr1, q.Expr2, q.Expr3, q.Expr4, q.Comment
+
+
+
+
+
+
+with cte (Comment, ye, mo, da, hor, Value, UIDTags)
+as (
+	Select q.Comment, q.ye, q.mo, q.da, q.hor, MAX(q.Value) as Value, q.UIDTags
+	from ( 
+		Select
+			ISNULL(TPA.!aDept.Tags.Comment, TPA.!aDept.Tags.Description) AS Comment,
+			UIDTags,
+			Timestamp,
+			CAST(Value AS Numeric(10, 0)) AS Value,
+			YEAR(Timestamp) AS ye,
+			MONTH(Timestamp) AS mo,
+			DAY(Timestamp) AS da,
+			{fn HOUR(Timestamp)} AS hor
+		FROM            TPA.!aDept.Tags INNER JOIN
+								 TPA.!aDept.Measures ON TPA.!aDept.Tags.UID = TPA.!aDept.Measures.UIDTags
+		WHERE uid in (12, 13, 36) and (Timestamp BETWEEN '03.14.2021' AND '03.15.2021' )
+	) as q GROUP BY q.ye, q.mo, q.da, q.hor, q.Comment, q.UIDTags
+)
+select tags.*, a1.Value as val1, a2.Value as val2
+from
+	(select DISTINCT ye, mo, da, hor from cte AS a) AS tags
+	LEFT JOIN cte AS a1 on a1.UIDTags = 13 and tags.ye = a1.ye and tags.mo = a1.mo and tags.da = a1.da and tags.hor = a1.hor
+	LEFT JOIN cte AS a2 on a2.UIDTags = 36 and tags.ye = a2.ye and tags.mo = a2.mo and tags.da = a2.da and tags.hor = a2.hor
+
+
+
+
+with cte (Comment, ye, mo, da, hor, Value, UIDTags)
+as (
+	Select q.Comment, q.ye, q.mo, q.da, q.hor, MAX(q.Value) as Value, q.UIDTags
+	from ( 
+		Select
+			ISNULL(TPA.!aDept.Tags.Comment, TPA.!aDept.Tags.Description) AS Comment,
+			UIDTags,
+			Timestamp,
+			CAST(Value AS Numeric(10, 0)) AS Value,
+			YEAR(Timestamp) AS ye,
+			MONTH(Timestamp) AS mo,
+			DAY(Timestamp) AS da,
+			{fn HOUR(Timestamp)} AS hor
+		FROM            TPA.!aDept.Tags INNER JOIN
+								 TPA.!aDept.Measures ON TPA.!aDept.Tags.UID = TPA.!aDept.Measures.UIDTags
+		WHERE uid in (12, 13, 36) and (Timestamp BETWEEN '03.14.2021' AND '03.15.2021' )
+	) as q GROUP BY q.ye, q.mo, q.da, q.hor, q.Comment, q.UIDTags
+)
+select tags.*, !aValue
+from
+	(select DISTINCT ye, mo, da, hor from cte AS a) AS tags
+	LEFT JOIN cte AS a1 on a1.UIDTags = 13 and tags.ye = a1.ye and tags.mo = a1.mo and tags.da = a1.da and tags.hor = a1.hor
+	LEFT JOIN cte AS a2 on a2.UIDTags = 36 and tags.ye = a2.ye and tags.mo = a2.mo and tags.da = a2.da and tags.hor = a2.hor
+
+
+
+select industry.dbo.IS_NUMERIC('2235.555.55') a, cast(replace('2235,55555', ',', '.') as decimal(10, 0))
